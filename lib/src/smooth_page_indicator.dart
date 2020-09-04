@@ -6,11 +6,14 @@ import 'effects/indicator_effect.dart';
 import 'effects/worm_effect.dart';
 import 'painters/indicator_painter.dart';
 
+import 'package:preload_page_view/preload_page_view.dart';
+
 typedef OnDotClicked = void Function(int index);
 
 class SmoothPageIndicator extends AnimatedWidget {
   // Page view controller
   final PageController controller;
+  final PreloadPageController preloadController;
 
   /// Holds effect configuration to be used in the [IndicatorPainter]
   final IndicatorEffect effect;
@@ -34,12 +37,13 @@ class SmoothPageIndicator extends AnimatedWidget {
   SmoothPageIndicator({
     Key key,
     @required this.controller,
+    this.preloadController,
     @required this.count,
     this.axisDirection = Axis.horizontal,
     this.textDirection,
     this.onDotClicked,
     this.effect = const WormEffect(),
-  }) : super(key: key, listenable: controller);
+  }) : super(key: key, listenable: preloadController ?? controller);
 
   @override
   Widget build(BuildContext context) {
@@ -55,8 +59,17 @@ class SmoothPageIndicator extends AnimatedWidget {
 
   double get _offset {
     try {
+      if (preloadController != null) {
+        return preloadController.page ??
+            preloadController.initialPage.toDouble();
+      }
+
       return controller.page ?? controller.initialPage.toDouble();
     } catch (_) {
+      if (preloadController != null) {
+        return preloadController.initialPage.toDouble();
+      }
+
       return controller.initialPage.toDouble();
     }
   }
